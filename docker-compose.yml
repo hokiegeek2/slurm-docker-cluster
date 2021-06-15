@@ -14,7 +14,7 @@ services:
       - var_lib_mysql:/var/lib/mysql
 
   slurmdbd:
-    image: slurm-docker-cluster:19.05.1
+    image: slurm-docker-cluster:20.02.3
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -24,11 +24,13 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6819"
+    ports:
+      - "6819:6819"
     depends_on:
       - mysql
 
   slurmctld:
-    image: slurm-docker-cluster:19.05.1
+    image: slurm-docker-cluster:20.02.3
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
@@ -39,11 +41,13 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6817"
+    ports:
+      - "6817:6817"
     depends_on:
       - "slurmdbd"
 
   c1:
-    image: slurm-docker-cluster:19.05.1
+    image: slurm-docker-cluster:20.02.3
     command: ["slurmd"]
     hostname: c1
     container_name: c1
@@ -58,7 +62,7 @@ services:
       - "slurmctld"
 
   c2:
-    image: slurm-docker-cluster:19.05.1
+    image: slurm-docker-cluster:20.02.3
     command: ["slurmd"]
     hostname: c2
     container_name: c2
@@ -69,6 +73,21 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6818"
+    depends_on:
+      - "slurmctld"
+
+  slurm-web:
+    image: hokiegeek2/slurm-web
+    command: ["/sbin/my_init"]
+    hostname: slurm-web
+    container_name: slurm-web
+    volumes:
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm-llnl/
+    expose:
+      - "8081"
+    ports:
+      - "8081:8081"
     depends_on:
       - "slurmctld"
 
